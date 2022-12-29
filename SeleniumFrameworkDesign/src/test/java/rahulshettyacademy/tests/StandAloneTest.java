@@ -1,4 +1,4 @@
-package rahulshettyacademy;
+package rahulshettyacademy.tests;
 
 import java.time.Duration;
 
@@ -15,9 +15,8 @@ import org.testng.Assert;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 import rahulshettyacademy.pageobject.LandingPage;
-import rahulshettyacademy.pageobject.ProductCatalogue;
 
-public class StandAloneTest2 {
+public class StandAloneTest {
 
 	public static void main(String[] args) {
 		
@@ -27,14 +26,17 @@ public class StandAloneTest2 {
 		LandingPage landingPage = new LandingPage(driver);
 		driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
 		driver.manage().window().maximize();
-		landingPage.goTo();
-		landingPage.loginApplication("bloodywitchmm@gmail.com", "Ucenjenapredovanje5!");
-		ProductCatalogue productCatalogue = new ProductCatalogue(driver);
-		List<WebElement>products = productCatalogue.getProductList();
-		productCatalogue.addProductToCart(productName);
-		productCatalogue.goToCartPage();
-		
-		
+		driver.get("https://rahulshettyacademy.com/client");
+		driver.findElement(By.id("userEmail")).sendKeys("bloodywitchmm@gmail.com");
+		driver.findElement(By.id("userPassword")).sendKeys("Ucenjenapredovanje5!");
+		driver.findElement(By.id("login")).click();
+		WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(5));
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".mb-3")));
+		List<WebElement> products = driver.findElements(By.cssSelector(".mb-3"));
+		WebElement prod = products.stream().filter(product->product.findElement(By.cssSelector("b")).getText().equals(productName)).findFirst().orElse(null);
+		prod.findElement(By.cssSelector(".card-body button:last-of-type")).click();	
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#toast-container")));
+		wait.until(ExpectedConditions.invisibilityOf(driver.findElement(By.cssSelector(".ng-animaiting"))));
 		driver.findElement(By.cssSelector("[routerlink*='cart']")).click();
 		List<WebElement> cartProducts = driver.findElements(By.cssSelector(".cartSection h3"));
 		Boolean match =  cartProducts.stream().anyMatch(cartProduct->cartProduct.getText().equalsIgnoreCase(productName));
